@@ -60,8 +60,8 @@ public class RxJavaUserServiceImpl implements RxJavaUserService {
         User user = userMapper.userIncomingDtoToUser(userIncomingDto);
         return rxJavaUserRepository.findById(id)
                 .flatMap(existingUser -> {
-                    existingUser.setName(userIncomingDto.getName());
-                    existingUser.setAge(userIncomingDto.getAge());
+                    existingUser.setName(user.getName());
+                    existingUser.setAge(user.getAge());
                     return rxJavaUserRepository.save(existingUser).toMaybe();
                 })
                 .map(userMapper::userToUserOutgoingDto)
