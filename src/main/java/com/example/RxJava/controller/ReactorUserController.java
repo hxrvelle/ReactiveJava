@@ -1,6 +1,8 @@
 package com.example.RxJava.controller;
 
-import com.example.RxJava.model.User;
+import com.example.RxJava.controller.dto.UserIncomingDto;
+import com.example.RxJava.controller.dto.UserOutgoingDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,28 +20,29 @@ import reactor.core.publisher.Mono;
 public class ReactorUserController {
     private final ReactorUserService reactorUserService;
 
+    @Autowired
     public ReactorUserController(ReactorUserService reactorUserService) {
         this.reactorUserService = reactorUserService;
     }
 
     @GetMapping
-    public Flux<User> getAllUsers() {
+    public Flux<UserOutgoingDto> getAllUsers() {
         return reactorUserService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public Mono<User> getUserById(@PathVariable Long id) {
+    public Mono<UserOutgoingDto> getUserById(@PathVariable Long id) {
         return reactorUserService.getUserById(id);
     }
 
     @PostMapping
-    public Mono<User> addUser(@RequestBody User user) {
-        return reactorUserService.addUser(user);
+    public Mono<UserOutgoingDto> addUser(@RequestBody UserIncomingDto userIncomingDto) {
+        return reactorUserService.addUser(userIncomingDto);
     }
 
     @PutMapping("/{id}")
-    public Mono<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        return reactorUserService.updateUser(id, updatedUser);
+    public Mono<UserOutgoingDto> updateUser(@PathVariable Long id, @RequestBody UserIncomingDto userIncomingDto) {
+        return reactorUserService.updateUser(id, userIncomingDto);
     }
 
     @DeleteMapping("/{id}")

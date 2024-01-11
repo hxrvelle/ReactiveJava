@@ -1,9 +1,13 @@
 package com.example.RxJava.service.impl;
 
+import com.example.RxJava.controller.dto.UserIncomingDto;
+import com.example.RxJava.controller.dto.UserOutgoingDto;
+import com.example.RxJava.controller.mapper.UserMapper;
 import com.example.RxJava.model.User;
 import com.example.RxJava.repository.ReactorUserRepository;
 import com.example.RxJava.service.ReactorUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -12,44 +16,53 @@ import reactor.core.publisher.Mono;
 @Service
 public class ReactorUserServiceImpl implements ReactorUserService {
     private final ReactorUserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public ReactorUserServiceImpl(ReactorUserRepository userRepository) {
+    @Autowired
+    public ReactorUserServiceImpl(ReactorUserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
-    public Flux<User> getAllUsers() {
+    public Flux<UserOutgoingDto> getAllUsers() {
         log.info("Getting all users");
         return userRepository.findAll()
+                .map(userMapper::userToUserOutgoingDto)
                 .doOnComplete(() -> log.info("Successfully retrieved all users"))
                 .doOnError(error -> log.error("Error retrieving all users", error));
     }
 
     @Override
-    public Mono<User> getUserById(Long id) {
+    public Mono<UserOutgoingDto> getUserById(Long id) {
         log.info("Getting user by id: {}", id);
         return userRepository.findById(id)
+                .map(userMapper::userToUserOutgoingDto)
                 .doOnSuccess(user -> log.info("Successfully retrieved user with id: {}", id))
                 .doOnError(error -> log.error("Error retrieving user with id: {}", id, error));
     }
 
     @Override
-    public Mono<User> addUser(User user) {
-        log.info("Adding user: {}", user);
+    public Mono<UserOutgoingDto> addUser(UserIncomingDto userIncomingDto) {
+        log.info("Adding user: {}", userIncomingDto);
+        User user = userMapper.userIncomingDtoToUser(userIncomingDto);
         return userRepository.save(user)
+                .map(userMapper::userToUserOutgoingDto)
                 .doOnSuccess(savedUser -> log.info("Successfully added user: {}", savedUser))
                 .doOnError(error -> log.error("Error adding user: {}", user, error));
     }
 
     @Override
-    public Mono<User> updateUser(Long id, User updatedUser) {
+    public Mono<UserOutgoingDto> updateUser(Long id, UserIncomingDto userIncomingDto) {
         log.info("Updating user with id: {}", id);
+        User user = userMapper.userIncomingDtoToUser(userIncomingDto);
         return userRepository.findById(id)
                 .flatMap(existingUser -> {
-                    existingUser.setName(updatedUser.getName());
-                    existingUser.setAge(updatedUser.getAge());
+                    existingUser.setName(user.getName());
+                    existingUser.setAge(user.getAge());
                     return userRepository.save(existingUser);
                 })
+                .map(userMapper::userToUserOutgoingDto)
                 .doOnSuccess(updated -> log.info("Successfully updated user with id: {}", id))
                 .doOnError(error -> log.error("Error updating user with id: {}", id, error));
     }
