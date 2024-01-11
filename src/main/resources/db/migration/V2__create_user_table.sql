@@ -6,5 +6,8 @@ CREATE TABLE users (
 
 INSERT INTO users (name, age) VALUES
     ('Alice', 25),
+    ('Alice', 255),
     ('Bob', 30),
-    ('Charlie', 22);
+    ('Bob', 300),
+    ('Charlie', 22),
+    ('Charlie', 222);
